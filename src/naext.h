@@ -52,8 +52,6 @@ using InitData = JavaVM*;
 using InitData = void*;
 #endif
 
-constexpr auto NAEXT_UA = "Naext";
-
 class Request;
 class RequestInternal;
 class ResponseInternal;

@@ -201,6 +201,7 @@ namespace Naext
         {
         assert(initialised);
         m_internal->m_url = aUrl;
+        AddHeader("User-Agent","Naext");
         }
 
     Request::Request(std::shared_ptr<RequestInternal> aInternal):
@@ -431,12 +432,6 @@ namespace Naext
         objc_msgSend_t(void, double)(request, sel("setTimeoutInterval:"), (double)(m_timeout_in_milliseconds) / 1000.0);
         id methodString = NSString(m_method.c_str());
         objc_msgSend_t(void, id)(request, sel("setHTTPMethod:"), methodString);
-
-        {
-        id name = NSString("User-Agent");
-        id value = NSString(NAEXT_UA);
-        objc_msgSend_t(void, id, id)(request, sel("setValue:forHTTPHeaderField:"), value, name);
-        }
 
         for (const auto& header: m_headers)
             {
@@ -780,7 +775,6 @@ namespace Naext
 
         setupMethod(c, aRequest->m_method.c_str());
 
-        m_header_list = curl_slist_append(nullptr,"User-Agent: Naett/1.0");
         for (const auto& p : aRequest->m_headers)
             {
             std::string header = p.first + ':' + p.second;
