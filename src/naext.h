@@ -62,7 +62,7 @@ Call this function to initialise the library.
 */
 void Init(InitData aInitData);
 
-// If ReadFunc is called with a null dest it must respond with the body size.
+/// If ReadFunc is called with a null dest it must respond with the body size.
 using ReadFunc = std::function<size_t(void* aDest,size_t aBufferSize)>;
 using WriteFunc = std::function<size_t(const void* aSource,size_t aBytes)>;
 using HeaderLister = std::function<bool(const char* aName,const char* aValue)>;
@@ -88,7 +88,7 @@ class Response
     /**
     Returns the status of a response.
     Positive codes are HTTP status codes returned by the server.
-    Negative codes are processing errors defined in Naett::Status.
+    Negative codes are processing errors defined in Naext::Status.
     */
     int Status();
     /// Returns the body of the response unless a body reader has been provided.
