@@ -73,12 +73,12 @@ SOFTWARE.
 #include <stdarg.h>
 
 #ifndef NDEBUG
-#define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "naett", __VA_ARGS__))
+#define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "naext", __VA_ARGS__))
 #else
 #define LOGD(...) ((void)0)
 #endif
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "naett", __VA_ARGS__))
-#define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "naett", __VA_ARGS__))
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "naext", __VA_ARGS__))
+#define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "naext", __VA_ARGS__))
 
 static JavaVM* globalVM = nullptr;
 
@@ -514,7 +514,7 @@ namespace Naext
 
         if (!TaskDelegateClass)
             {
-            TaskDelegateClass = objc_allocateClassPair((Class)objc_getClass("NSObject"), "naettTaskDelegate", 0);
+            TaskDelegateClass = objc_allocateClassPair((Class)objc_getClass("NSObject"), "NaextTaskDelegate", 0);
             class_addProtocol(TaskDelegateClass, objc_getProtocol("NSURLSessionDataDelegate"));
 
             addMethod(TaskDelegateClass, "URLSession:dataTask:didReceiveData:", didReceiveData, "v@:@@@");
@@ -1010,7 +1010,7 @@ namespace Naext
 
         m_host.assign(components.lpszHostName,components.dwHostNameLength);
         m_resource.assign(components.lpszUrlPath,components.dwUrlPathLength + components.dwExtraInfoLength);
-        m_session = WinHttpOpen(L"Naett",WINHTTP_ACCESS_TYPE_NO_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,WINHTTP_FLAG_ASYNC);
+        m_session = WinHttpOpen(L"Naext",WINHTTP_ACCESS_TYPE_NO_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,WINHTTP_FLAG_ASYNC);
         if (!m_session)
             {
             PlatformClose();
@@ -1211,7 +1211,7 @@ ResponseInternal::ResponseInternal(std::shared_ptr<RequestInternal> aRequest):
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     pthread_create(&m_worker_thread, &attr, ProcessRequestFunction, this);
-    pthread_setname_np(m_worker_thread, "naett worker thread");
+    pthread_setname_np(m_worker_thread, "naext worker thread");
     }
 
 void ResponseInternal::ProcessRequest()
