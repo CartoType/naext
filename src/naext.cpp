@@ -12,7 +12,7 @@ Based on the Naett library.
 MIT License
 
 Naext library (this software) Copyright (C) 2023 CartoType Ltd.
-Naett library, on which this software is based, Copyright (C) 2021 Erik Agsjö.
+Naett library, on which this software is based, Copyright (C) 2021 Erik AgsjÃ¶.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1222,6 +1222,7 @@ void ResponseInternal::ProcessRequest()
     auto finally = [&]()
         {
         m_complete = true;
+        env->DeleteLocalRef(buffer);
         env->PopLocalFrame(nullptr);
         JavaVM* vm = getVM();
         env->ExceptionClear();
