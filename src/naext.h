@@ -93,8 +93,8 @@ class Response
     int Status();
     /// Returns the body of the response unless a body reader has been provided.
     const std::string& Body();
-    /// Returns a header for a given name.
-    const char* Header(const char* aName);
+    /// Returns a header for a given name, or the empty string if the header's value is empty or the header does not exist.
+    const std::string& Header(const char* aName);
     /// Lists the headers, stopping if the lister function returns false.
     void ListHeaders(HeaderLister aLister);
     /// Returns the request that initiated this reponse.

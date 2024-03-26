@@ -12,7 +12,7 @@ Based on the Naett library.
 MIT License
 
 Naext library (this software) Copyright (C) 2023 CartoType Ltd.
-Naett library, on which this software is based, Copyright (C) 2021 Erik AgsjÃ¶.
+Naett library, on which this software is based, Copyright (C) 2021 Erik Agsjö.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -277,13 +277,14 @@ namespace Naext
         return m_internal->m_body;
         }
 
-    const char* Response::Header(const char* aName)
+    const std::string& Response::Header(const char* aName)
         {
+        static std::string empty_string;
         assert(aName);
         auto iter = m_internal->m_headers.find(LowerCase(aName));
         if (iter == m_internal->m_headers.end())
-            return nullptr;
-        return iter->second.c_str();
+            return empty_string;
+        return iter->second;
         }
 
     void Response::ListHeaders(HeaderLister aLister)
@@ -799,27 +800,29 @@ namespace Naext
         {
         }
 
-    std::string WinToUTF8(const wchar_t* aSource)
+    static std::string WinToUTF8(const std::wstring& aSource)
         {
-        int length = WideCharToMultiByte(CP_UTF8,0,aSource,-1,nullptr,0,nullptr,nullptr);
+        int32_t source_length = int32_t(std::min(aSource.length(),size_t(INT32_MAX)));
+        int length = WideCharToMultiByte(CP_UTF8,0,aSource.data(),source_length,nullptr,0,nullptr,nullptr);
         std::string s(length,0);
-        int result = WideCharToMultiByte(CP_UTF8,0,aSource,-1,&s[0],length,nullptr,nullptr);
-        if (!result)
+        length = WideCharToMultiByte(CP_UTF8,0,aSource.data(),source_length,&s[0],length,nullptr,nullptr);
+        if (!length)
             s.clear();
         return s;
         }
 
-    std::wstring WinFromUTF8(const char* aSource)
+    static std::wstring WinFromUTF8(const std::string& aSource)
         {
-        int length = MultiByteToWideChar(CP_UTF8,0,aSource,-1,nullptr,0);
+        int32_t source_length = int32_t(std::min(aSource.length(),size_t(INT32_MAX)));
+        int length = MultiByteToWideChar(CP_UTF8,0,aSource.data(),source_length,nullptr,0);
         std::wstring s(length,0);
-        int result = MultiByteToWideChar(CP_UTF8,0,aSource,-1,&s[0],length);
-        if (!result)
+        length = MultiByteToWideChar(CP_UTF8,0,aSource.data(),source_length,&s[0],length);
+        if (!length)
             s.clear();
         return s;
         }
 
-    std::wstring PackHeaders(const RequestInternal& aRequest)
+    static std::wstring PackHeaders(const RequestInternal& aRequest)
         {
         std::string s;
         for (const auto& p : aRequest.m_headers)
@@ -830,12 +833,12 @@ namespace Naext
             s += ':';
             s += p.second;
             }
-        return WinFromUTF8(s.c_str());
+        return WinFromUTF8(s);
         }
 
-    void UnpackHeaders(ResponseInternal& aResponse,const std::wstring& aPacked)
+    static void UnpackHeaders(ResponseInternal& aResponse,const std::wstring& aPacked)
         {
-        auto h = WinToUTF8(aPacked.c_str());
+        auto h = WinToUTF8(aPacked);
         char* key = &h[0];
         aResponse.m_headers.clear();
         std::map<std::string,std::string> headers;
@@ -856,11 +859,11 @@ namespace Naext
             }
         }
 
-    static void callback(HINTERNET aRequest,
-                         DWORD_PTR aContext,
-                         DWORD aStatus,
-                         LPVOID aStatusInformation,
-                         DWORD aStatusInfoLength)
+    static void CALLBACK callback(HINTERNET aRequest,
+                                  DWORD_PTR aContext,
+                                  DWORD aStatus,
+                                  LPVOID aStatusInformation,
+                                  DWORD aStatusInfoLength)
         {
         ResponseInternal* res = (ResponseInternal*)aContext;
 
@@ -996,7 +999,7 @@ namespace Naext
         if (m_platform_open)
             return;
 
-        auto url = WinFromUTF8(m_url.c_str());
+        auto url = WinFromUTF8(m_url);
         URL_COMPONENTS components;
         ZeroMemory(&components,sizeof(components));
         components.dwStructSize = sizeof(components);
@@ -1025,7 +1028,7 @@ namespace Naext
             return;
             }
 
-        auto verb = WinFromUTF8(m_method.c_str());
+        auto verb = WinFromUTF8(m_method);
         m_request = WinHttpOpenRequest(m_connection,
                                        verb.c_str(),
                                        m_resource.c_str(),
@@ -1222,7 +1225,6 @@ void ResponseInternal::ProcessRequest()
     auto finally = [&]()
         {
         m_complete = true;
-        env->DeleteLocalRef(buffer);
         env->PopLocalFrame(nullptr);
         JavaVM* vm = getVM();
         env->ExceptionClear();
